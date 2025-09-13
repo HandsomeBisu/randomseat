@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>자리 랜덤 배치</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="icon" type="image/png" href="assets/logo.png">
+</head>
+<body>
+    <header class="simple-header">
+        <img src="assets/logo.png" alt="DPS Logo" class="nav-logo">
+        <h1>자리 배치 결과</h1>
+    </header>
+
+    <main>
+        <div class="container">
+            <div class="screen active" id="seatingScreen">
+              <div class="classroom" id="classroom"></div>
+              <div id="dragGuide">자리 번호를 드래그하여 자리를 조정할 수 있습니다.</div>
+              <button id="resetBtn" onclick="window.location.href = 'index.html'" class="hero-button">다시 설정하기</button>
+            </div>
+        </div>
+    </main>
+    
+    <div class="loader-overlay" id="loader">
+        <div class="loader-popup">
+            <div class="spinner"></div>
+            <div>자리를 배치하는 중입니다...</div>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+    <script src="js/result.js"></script>
+</body>
+</html>
