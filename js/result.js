@@ -46,6 +46,57 @@ function shuffle(array) {
   return array;
 }
 
+function getNeighborSeats(seatIndex) {
+    const neighbors = [];
+    const row = Math.floor(seatIndex / 5);
+    const col = seatIndex % 5;
+
+    // Left
+    if (col > 0) {
+        neighbors.push(seatIndex - 1);
+    }
+    // Right
+    if (col < 4) {
+        neighbors.push(seatIndex + 1);
+    }
+    // Up
+    if (row > 0) {
+        neighbors.push(seatIndex - 5);
+    }
+    // Down
+    if (row < 4) { // Assuming 5 rows
+        neighbors.push(seatIndex + 5);
+    }
+
+    return neighbors;
+}
+
+function isValidClass2Seating(seating, max) {
+    const student20 = 20;
+    if (max < student20) return true;
+
+    const forbiddenNeighbors = [1, 6, 9, 11, 13, 24];
+    
+    const student20Index = seating.indexOf(student20);
+    
+    if (student20Index === -1) {
+        return true;
+    }
+    
+    const neighborIndices = getNeighborSeats(student20Index);
+    
+    for (const index of neighborIndices) {
+        if (index < seating.length) {
+            const neighborStudent = seating[index];
+            if (forbiddenNeighbors.includes(neighborStudent)) {
+                return false;
+            }
+        }
+    }
+    
+    return true;
+}
+
 let dragSrc = null;
 
 function handleDragStart(e) {
@@ -96,14 +147,26 @@ function displaySeatingResults() {
     let priorityNumbers = priorityStudents.filter(n => n <= max);
     let remainingNumbers = numbers.filter(num => !priorityNumbers.includes(num));
     
-            shuffle(priorityNumbers);
+    shuffle(priorityNumbers);
 
-        // To improve perceived randomness, shuffle the remaining students multiple times.
-        for (let i = 0; i < 3; i++) {
-            shuffle(remainingNumbers);
+    // To improve perceived randomness, shuffle the remaining students multiple times.
+    for (let i = 0; i < 3; i++) {
+        shuffle(remainingNumbers);
+    }
+
+    let finalSeating = [...priorityNumbers, ...remainingNumbers];
+
+    if (selectedClass === '2반') {
+        let attempts = 0;
+        const maxAttempts = 100; // To prevent infinite loops
+        while (attempts < maxAttempts) {
+            finalSeating = shuffle([...finalSeating]); // Create a new shuffled array
+            if (isValidClass2Seating(finalSeating, max)) {
+                break;
+            }
+            attempts++;
         }
-
-    const finalSeating = [...priorityNumbers, ...remainingNumbers];
+    }
 
     let seatCount = 0;
     for (let i = 0; i < 25; i++) {

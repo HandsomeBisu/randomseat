@@ -14,7 +14,7 @@
             <div class="loading-bar-container">
                 <div class="loading-bar"></div>
             </div>
-            <div class="loading-text">환상적인 자리 배치를 만드는중...<br><small>자리 배치표는 <strong>완전 랜덤 함수</strong>를 사용하기 때문에 조작할 수 없습니다.</small></div>
+            <div class="loading-text">환상적인 자리 배치를 만드는중...</div>
         </div>
     </div>
 
@@ -27,7 +27,7 @@
                     // Set flag to skip loader on result page
                     sessionStorage.setItem('hasFinishedLoading', 'true');
                     window.location.href = destinationUrl;
-                }, 4000); // 4초 로딩 (긴장감 조성) // 사실 바로 보여줄수 있기는 함 ㅋ
+                }, 4000); // 4초 로딩
             } else {
                 // 비정상적인 접근 시 메인 페이지로 이동
                 window.location.href = 'index.html';
