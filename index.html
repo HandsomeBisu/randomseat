@@ -3,121 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>자리 랜덤 배치</title>
+    <title>DPS CLASS</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="icon" type="image/png" href="assets/logo.png">
 </head>
 <body>
-    <div class="initial-loader">
-        <img src="assets/logo.png" alt="Logo" class="loading-logo">
-        <div class="loading-bar-container">
-            <div class="loading-bar"></div>
-        </div>
-    </div>
-
-    <div id="main-content">
+    <div class="menu-container">
         <header>
-            <div class="hero">
-                <div class="hero-logo-container">
-                    <img src="assets/logo.png" alt="DPS Logo" class="hero-logo">
-                </div>
-                <h1>자리 랜덤 배치</h1>
-            </div>
+            <h1>안녕하세요!</h1>
+            <h2>오늘은 어떤걸 해볼까요?</h2>
         </header>
-
-        <main>
-            <div class="container">
-                <div class="screen active" id="inputScreen">
-                  <h1>반을 선택하고 마지막 번호를 입력하세요</h1>
-                  <div class="custom-select-wrapper">
-                    <div class="custom-select">
-                      <div class="custom-select__trigger"><span>1반</span>
-                        <div class="arrow"></div>
-                      </div>
-                      <div class="custom-options">
-                        <span class="custom-option selected" data-value="1반">1반</span>
-                        <span class="custom-option" data-value="2반">2반</span>
-                        <span class="custom-option" data-value="3반">3반</span>
-                        <span class="custom-option" data-value="4반">4반</span>
-                        <span class="custom-option" data-value="5반">5반</span>
-                        <span class="custom-option" data-value="6반">6반</span>
-                      </div>
-                    </div>
-                    <input type="hidden" id="classSelect" value="1반">
-                  </div>
-                  <br>
-                  <input type="number" id="maxNumber" min="1" max="25" placeholder="예: 24" />
-                  <br>
-                  <button onclick="showPriorityScreen()" class="hero-button">다음</button>
-                  <div class="footer">© 2025. Made by Cho seung woo, DPS <br>DPS는 Don't Play Solo의 약자입니다.</div>
+        <main class="menu-grid">
+            <a href="seat_assignment.html" class="menu-item">
+                <div class="menu-item-content">
+                    <h2>자리배치</h2>
+                    <p>학생들의 자리를 랜덤으로 배치합니다.</p>
                 </div>
-
-                <div class="screen" id="priorityScreen">
-                  <div id="prioritySelection">
-                    <h3>앞자리에 우선적으로 배치할 학생을 선택해주세요.</h3>
-                    <div id="priorityStudentList"></div>
-                  </div>
-                  <button id="startSeatingBtn" onclick="startSeating()" class="hero-button" style="background-color: #6c757d;">선택 안함</button>
-                  <button onclick="showInputScreen()" class="hero-button" style="background-color: #6c757d; margin-left: 10px;">뒤로</button>
-                  <div class="footer">© 2025. Made by Cho seung woo, DPS <br>DPS는 Don't Play Solo의 약자입니다.</div>
+            </a>
+            <div class="menu-item disabled">
+                <div class="menu-item-content">
+                    <h2>발표자 뽑기</h2>
+                    <p>랜덤으로 발표자를 뽑습니다.</p>
+                </div>
+            </div>
+            <div class="menu-item disabled">
+                <div class="menu-item-content">
+                    <h2>모둠 만들기</h2>
+                    <p>학생들을 랜덤으로 모둠으로 나눕니다.</p>
                 </div>
             </div>
         </main>
-
-        <div class="custom-alert-overlay" id="customAlert">
-            <div class="custom-alert-popup">
-                <p id="customAlertMessage"></p>
-                <button id="customAlertConfirm" style="display:none; margin-right: 10px;">확인</button>
-                <button id="customAlertClose">확인</button>
+        <div id="ad-modal" class="modal-overlay">
+            <div class="ad-container">
+                <span class="close-button">&times;</span>
+                <a href="https://store.dpsteam.xyz" target="_blank">
+                    <img src="assets/ad.png" alt="Advertisement" class="ad-image">
+                </a>
             </div>
         </div>
-
-        <div class="loader-overlay" id="loader">
-            <div class="in-app-loader-content">
-                <img src="assets/logo.png" alt="Logo" class="loading-logo">
-                <div class="loading-bar-container">
-                    <div class="loading-bar"></div>
-                </div>
-                <div class="loading-text">잠시만 기다려주세요...</div>
-            </div>
-        </div>
-
-        <script src="js/main.js"></script>
-        <script src="js/seat_app.js"></script>
+        <footer>
+            <p>© 2025. DPS All Rights Reserved.</p>
+        </footer>
     </div>
 
     <script>
-        (function() {
-            const loader = document.querySelector('.initial-loader');
-            const mainContent = document.getElementById('main-content');
+        window.addEventListener('load', function() {
+            var modal = document.getElementById('ad-modal');
+            modal.style.display = 'flex';
 
-            if (sessionStorage.getItem('hasLoadedOnce') !== 'true') {
-                // This is the first visit in this session.
-                document.body.classList.add('is-first-load');
-                sessionStorage.setItem('hasLoadedOnce', 'true');
+            var closeButton = document.querySelector('.close-button');
+            closeButton.onclick = function() {
+                modal.style.display = 'none';
+            }
 
-                // Wait for the loading animation to finish.
-                setTimeout(() => {
-                    if (loader) {
-                        loader.style.opacity = '0';
-                        loader.addEventListener('transitionend', () => {
-                            if (loader) {
-                                loader.remove();
-                            }
-                        });
-                    }
-                    if (mainContent) {
-                        mainContent.style.opacity = '1';
-                    }
-                }, 4000); // 4-second loading time
-            } else {
-                // This is a refresh or subsequent navigation, so remove the loader immediately.
-                if (loader) {
-                    loader.remove();
+            window.onclick = function(event) {
+                if (event.target == modal) {
+                    modal.style.display = 'none';
                 }
             }
-        })();
+        });
     </script>
 </body>
 </html>
