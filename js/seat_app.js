@@ -64,14 +64,12 @@ function startSeating() {
   
   const resultUrl = `result.html?class=${encodeURIComponent(selectedClass)}&max=${max}&priority=${priorityStudents.join(',')}`;
   
-  sessionStorage.setItem('seatingResultUrl', resultUrl);
-  
   // Add fade-out effect
   document.body.classList.add('fade-out');
   
   // Wait for fade-out to complete, then redirect
   setTimeout(() => {
-      window.location.href = 'seating-loader.html';
+      window.location.href = resultUrl;
   }, 500); // Matches the CSS transition duration
 }
 

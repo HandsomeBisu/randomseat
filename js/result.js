@@ -32,6 +32,7 @@ const classData = {
 
 const contributors = [
     { class: '1반', name: '신지광' },
+    { class: '2반', name: '조승우' },
     { class: '3반', name: '이우주' },
     { class: '4반', name: '이태윤' },
     { class: '5반', name: '제동건' },
@@ -123,113 +124,226 @@ function handleDrop(e) {
   }
 }
 
-function displaySeatingResults() {
+async function animateAndAssignSeats() {
     const classroom = document.getElementById("classroom");
     const urlParams = new URLSearchParams(window.location.search);
     const selectedClass = urlParams.get('class');
     const max = parseInt(urlParams.get('max'));
     const priorityStudents = urlParams.get('priority') ? urlParams.get('priority').split(',').map(Number).filter(n => !isNaN(n) && n > 0) : [];
 
-    if (!selectedClass || !classData[selectedClass]) {
-        classroom.innerHTML = "<h1>잘못된 반 정보입니다.</h1>";
+    if (!selectedClass || !classData[selectedClass] || isNaN(max) || max < 1 || max > 25) {
+        classroom.innerHTML = "<h1>잘못된 정보입니다.</h1>";
         return;
     }
 
-    if (isNaN(max) || max < 1 || max > 25) {
-        classroom.innerHTML = "<h1>잘못된 학생 수 정보입니다.</h1>";
-        return;
-    }
-
+    // 1. Initial Ordered Placement
     classroom.innerHTML = `<div class="chalkboard">칠판</div>`;
-
-    let numbers = Array.from({ length: max }, (_, i) => i + 1);
-    
-    let priorityNumbers = priorityStudents.filter(n => n <= max);
-    let remainingNumbers = numbers.filter(num => !priorityNumbers.includes(num));
-    
-    shuffle(priorityNumbers);
-
-    // To improve perceived randomness, shuffle the remaining students multiple times.
-    for (let i = 0; i < 3; i++) {
-        shuffle(remainingNumbers);
+    let currentSeating = Array.from({ length: max }, (_, i) => i + 1);
+    for (let i = 0; i < 25; i++) {
+        const seat = document.createElement("div");
+        seat.className = "seat";
+        seat.dataset.seatId = i;
+        if (i < max) {
+            const studentNumber = currentSeating[i];
+            const studentName = classData[selectedClass][studentNumber - 1];
+            const seatText = document.createElement('span');
+            seatText.className = 'seat-text';
+            seatText.textContent = `${studentNumber}번\n${studentName || ''}`;
+            seat.appendChild(seatText);
+        } else {
+            seat.textContent = "-";
+        }
+        classroom.appendChild(seat);
+        seat.style.opacity = 1;
+        seat.style.transform = 'translateY(0)';
     }
 
-    let finalSeating = [...priorityNumbers, ...remainingNumbers];
-
-    if (selectedClass === '2반') {
-        let attempts = 0;
-        const maxAttempts = 100; // To prevent infinite loops
-        while (attempts < maxAttempts) {
-            finalSeating = shuffle([...finalSeating]); // Create a new shuffled array
-            if (isValidClass2Seating(finalSeating, max)) {
-                break;
+    // 2. Show "Look Carefully!" Overlay
+    const attentionOverlay = document.getElementById("attention-overlay");
+    if (attentionOverlay) {
+        // Scroll to classroom before showing attention overlay
+        setTimeout(() => {
+            const classroomElement = document.getElementById("classroom");
+            if (classroomElement) {
+                classroomElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
-            attempts++;
+        }, 100);
+
+        attentionOverlay.classList.add("active");
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        attentionOverlay.classList.remove("active");
+        await new Promise(resolve => setTimeout(resolve, 500));
+    }
+
+    // 3. Generate and Animate Swaps
+    const desiredSwaps = 100; // Increased from 70
+    let delay = 500;
+    const minDelay = 50;
+    const decayFactor = Math.pow(minDelay / delay, 1 / 39);
+
+    if (max > 1) {
+        for (let i = 0; i < desiredSwaps; i++) {
+            await new Promise(resolve => setTimeout(resolve, delay));
+
+            const seatIdx1 = Math.floor(Math.random() * max);
+            let seatIdx2 = Math.floor(Math.random() * max);
+            while (seatIdx1 === seatIdx2) {
+                seatIdx2 = Math.floor(Math.random() * max);
+            }
+
+            const seat1 = classroom.querySelector(`[data-seat-id='${seatIdx1}']`);
+            const seat2 = classroom.querySelector(`[data-seat-id='${seatIdx2}']`);
+
+            if (seat1 && seat2) {
+                [currentSeating[seatIdx1], currentSeating[seatIdx2]] = [currentSeating[seatIdx2], currentSeating[seatIdx1]];
+                const tempHTML = seat1.innerHTML;
+                seat1.innerHTML = seat2.innerHTML;
+                seat2.innerHTML = tempHTML;
+
+                seat1.classList.add("swap");
+                seat2.classList.add("swap");
+                setTimeout(() => {
+                    seat1.classList.remove("swap");
+                    seat2.classList.remove("swap");
+                }, 300);
+            }
+
+            if (i < 39) {
+                delay *= decayFactor;
+            } else {
+                delay = minDelay;
+            }
+        }
+    }
+    // await new Promise(resolve => setTimeout(resolve, 500)); // Removed pause
+
+    // 4. Animate Correction Step for Priority Seating
+    const prioritySeatCount = priorityStudents.length;
+    const prioritySeatIndices = new Set(Array.from({ length: prioritySeatCount }, (_, i) => i));
+    
+    let misplacedPriority = [];
+    let misplacedNormal = [];
+
+    for (let i = 0; i < max; i++) {
+        const studentNumber = currentSeating[i];
+        const isPriority = priorityStudents.includes(studentNumber);
+        const isInPriorityZone = prioritySeatIndices.has(i);
+
+        if (isPriority && !isInPriorityZone) {
+            misplacedPriority.push(i);
+        }
+        if (!isPriority && isInPriorityZone) {
+            misplacedNormal.push(i);
         }
     }
 
-    let seatCount = 0;
-    for (let i = 0; i < 25; i++) {
-      const seat = document.createElement("div");
-      seat.className = "seat";
-      if (seatCount < max) {
-          const number = finalSeating[seatCount];
-          const name = classData[selectedClass][number - 1];
-          
-          const seatText = document.createElement('span');
-          seatText.className = 'seat-text';
-          seatText.textContent = number ? `${number}번\n${name ?? ''}` : "-";
-          seat.appendChild(seatText);
-
-          const isContributor = contributors.some(c => c.class === selectedClass && c.name === name);
-
-          if (isContributor) {
-              const icon = document.createElement('i');
-              icon.className = 'material-icons certification-mark';
-              icon.textContent = 'verified';
-              seat.appendChild(icon);
-          }
-
-      } else {
-          seat.textContent = "-";
-      }
-      seat.draggable = true;
-      seat.addEventListener("dragstart", handleDragStart);
-      seat.addEventListener("dragover", handleDragOver);
-      seat.addEventListener("drop", handleDrop);
-      classroom.appendChild(seat);
-      setTimeout(() => seat.classList.add("show"), 100 + (Math.floor(i / 5) * 120));
-      seatCount++;
+    const correctionSwaps = [];
+    for (let i = 0; i < Math.min(misplacedNormal.length, misplacedPriority.length); i++) {
+        correctionSwaps.push({ from: misplacedNormal[i], to: misplacedPriority[i] });
     }
+
+    if (correctionSwaps.length > 0) {
+        // await new Promise(resolve => setTimeout(resolve, 500)); // Removed pause
+        const correctionDelay = minDelay; // Set to max speed
+        for (const swap of correctionSwaps) {
+            await new Promise(resolve => setTimeout(resolve, correctionDelay));
+            const seat1 = classroom.querySelector(`[data-seat-id='${swap.from}']`);
+            const seat2 = classroom.querySelector(`[data-seat-id='${swap.to}']`);
+            if (seat1 && seat2) {
+                [currentSeating[swap.from], currentSeating[swap.to]] = [currentSeating[swap.to], currentSeating[swap.from]];
+                const tempHTML = seat1.innerHTML;
+                seat1.innerHTML = seat2.innerHTML;
+                seat2.innerHTML = tempHTML;
+                seat1.classList.add("swap");
+                seat2.classList.add("swap");
+                setTimeout(() => {
+                    seat1.classList.remove("swap");
+                    seat2.classList.remove("swap");
+                }, 300);
+            }
+        }
+    }
+    // await new Promise(resolve => setTimeout(resolve, 500)); // Removed pause
+
+    // 5. Finalization
+    const allSeats = classroom.querySelectorAll('.seat');
+    allSeats.forEach((seat, i) => {
+        if (i < max) {
+            const studentNumber = currentSeating[i];
+            const studentName = classData[selectedClass][studentNumber - 1];
+            
+            const existingIcon = seat.querySelector('.certification-mark');
+            if (existingIcon) existingIcon.remove();
+
+            const isContributor = contributors.some(c => c.class === selectedClass && c.name === studentName);
+            if (isContributor) {
+                const icon = document.createElement('i');
+                icon.className = 'material-icons certification-mark';
+                icon.textContent = 'verified';
+                seat.appendChild(icon);
+            }
+
+            seat.draggable = true;
+            seat.addEventListener("dragstart", handleDragStart);
+            seat.addEventListener("dragover", handleDragOver);
+            seat.addEventListener("drop", handleDrop);
+        }
+    });
 
     document.getElementById("dragGuide").classList.add("visible");
-
     setTimeout(() => {
-        const classroomElement = document.getElementById("classroom");
-        if (classroomElement) {
-            classroomElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
+        classroom.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }, 800);
+
+    launchFireworks();
+}
+
+function createExplosion(x, y) {
+    const container = document.getElementById('fireworks-container');
+    const particleCount = 50; // Increased particle count for a fuller effect
+    const colors = ['#FFC700', '#FF0000', '#00FF00', '#0000FF', '#FF00FF', '#00FFFF'];
+
+    for (let i = 0; i < particleCount; i++) {
+        const particle = document.createElement('div');
+        particle.classList.add('particle');
+        container.appendChild(particle);
+
+        const angle = Math.random() * Math.PI * 2;
+        const velocity = Math.random() * 6 + 2; // Increased velocity
+        const radius = Math.random() * (window.innerWidth * 0.2) + (window.innerWidth * 0.2); // Make radius relative to screen width
+        const endX = Math.cos(angle) * radius;
+        const endY = Math.sin(angle) * radius;
+
+        particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        particle.style.left = `${x}px`;
+        particle.style.top = `${y}px`;
+
+        const animation = particle.animate([
+            { transform: 'translate(0, 0)', opacity: 1 },
+            { transform: `translate(${endX}px, ${endY}px)`, opacity: 1 },
+            { transform: `translate(${endX}px, ${endY + 200}px)`, opacity: 0 } // Increased fall distance
+        ], {
+            duration: 2000 + Math.random() * 1000, // Increased duration
+            easing: 'cubic-bezier(0.1, 0.5, 0.1, 1)',
+            fill: 'forwards'
+        });
+
+        animation.onfinish = () => {
+            particle.remove();
+        };
+    }
+}
+
+function launchFireworks() {
+    const launchPoints = [0.1, 0.9]; // Left and right sides
+    launchPoints.forEach(point => {
+        setTimeout(() => {
+            createExplosion(window.innerWidth * point, window.innerHeight * 0.5);
+        }, Math.random() * 500);
+    });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
     document.querySelector('.container').classList.add('loaded');
-
-    if (sessionStorage.getItem('hasFinishedLoading') === 'true') {
-        const loader = document.getElementById("loader");
-        if(loader) loader.remove();
-        
-        displaySeatingResults();
-
-        sessionStorage.removeItem('hasFinishedLoading');
-    } else {
-        const loader = document.getElementById("loader");
-        loader.classList.add("active");
-
-        const delay = Math.random() * 2000 + 1000;
-        setTimeout(() => {
-            loader.classList.remove("active");
-            displaySeatingResults();
-        }, delay);
-    }
+    animateAndAssignSeats();
 });

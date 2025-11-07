@@ -271,7 +271,7 @@ select, input {
 
 /* Custom CSS Tooltip */
 .certification-mark::after {
-    content: '이 학생은 사이트 제작에 기여했습니다.';
+    content: '기여자 또는 개발자';
     position: absolute;
     bottom: 140%;
     left: 50%;
@@ -346,6 +346,47 @@ select, input {
 .loader-overlay.active {
     opacity: 1;
     pointer-events: all;
+}
+
+.loader-popup {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+    max-width: 90%;
+}
+
+.attention-icon {
+    width: 160px;
+    height: auto;
+    max-width: 100%;
+}
+
+.attention-text {
+    font-size: 48px;
+    color: #fff;
+    margin-top: 20px;
+}
+
+#fireworks-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10000;
+}
+
+.particle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    opacity: 0;
 }
 
 .loader-overlay .in-app-loader-content {
@@ -888,5 +929,13 @@ body.is-first-load #main-content {
 .close-button:focus {
     color: white;
     text-decoration: none;
-    cursor: pointer;
+.attention-icon {
+    width: 80px;
+    height: auto;
+}
+
+.attention-text {
+    font-size: 36px;
+    color: #fff;
+    margin-top: 20px;
 }
