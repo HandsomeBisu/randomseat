@@ -49,7 +49,7 @@
                   <br>
                   <input type="number" id="maxNumber" min="1" max="25" placeholder="예: 24" />
                   <br>
-                  <button onclick="showPriorityScreen()" class="hero-button">다음</button>
+                  <button onclick="showConsentModal()" class="hero-button">다음</button>
                   <div class="footer">© 2025. Made by DPS Team<br>이메일 문의: support@dpsteam.xyz</div>
                 </div>
 
@@ -64,6 +64,18 @@
                 </div>
             </div>
         </main>
+
+        <div class="custom-alert-overlay" id="consentModal">
+            <div class="custom-alert-popup">
+                <h3>안내</h3>
+                <p>자리는 <strong>임의로 조작</strong>할 수 없습니다.<br>DPS Team에서 제공하는 자리 배치 사이트의 결과는 100% 랜덤이며,<br>공정한 결과를 제공하기 위해 노력하고 있습니다.</p>
+                <div class="consent-checkbox">
+                    <input type="checkbox" id="consentCheckbox">
+                    <label for="consentCheckbox">위 내용을 확인했습니다.</label>
+                </div>
+                <button id="consentConfirmBtn" class="hero-button" disabled>계속하기</button>
+            </div>
+        </div>
 
         <div class="custom-alert-overlay" id="customAlert">
             <div class="custom-alert-popup">

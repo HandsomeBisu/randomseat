@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DPS CLASS</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=1.1">
     <link rel="icon" type="image/png" href="assets/logo.png">
 </head>
 <body>
@@ -33,35 +33,10 @@
                 </div>
             </div>
         </main>
-        <div id="ad-modal" class="modal-overlay">
-            <div class="ad-container">
-                <span class="close-button">&times;</span>
-                <a href="https://store.dpsteam.xyz" target="_blank">
-                    <img src="assets/ad.png" alt="Advertisement" class="ad-image">
-                </a>
-            </div>
-        </div>
         <footer>
             <p>© 2025. DPS All Rights Reserved.<br>이메일 문의: support@dpsteam.xyz</p>
         </footer>
     </div>
 
-    <script>
-        window.addEventListener('load', function() {
-            var modal = document.getElementById('ad-modal');
-            modal.style.display = 'flex';
-
-            var closeButton = document.querySelector('.close-button');
-            closeButton.onclick = function() {
-                modal.style.display = 'none';
-            }
-
-            window.onclick = function(event) {
-                if (event.target == modal) {
-                    modal.style.display = 'none';
-                }
-            }
-        });
-    </script>
 </body>
 </html>

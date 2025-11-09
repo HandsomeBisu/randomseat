@@ -30,8 +30,8 @@ const classData = {
   ]
 };
 
-function fadeIn(element) {
-  element.style.display = 'block';
+function fadeIn(element, displayType = 'block') {
+  element.style.display = displayType;
   setTimeout(() => element.classList.add('active'), 20);
 }
 
@@ -45,12 +45,42 @@ function showInputScreen() {
   fadeIn(document.getElementById('inputScreen'));
 }
 
-function showPriorityScreen() {
+function showConsentModal() {
   const selectedClass = document.getElementById('classSelect').value;
   const max = parseInt(document.getElementById('maxNumber').value);
   if (!max || max < 1 || max > 25) {
     showCustomAlert(`올바른 숫자를 입력해주세요.`);
     return;
+  }
+
+  const consentModal = document.getElementById('consentModal');
+  const consentCheckbox = document.getElementById('consentCheckbox');
+  const consentConfirmBtn = document.getElementById('consentConfirmBtn');
+
+  fadeIn(consentModal, 'flex');
+
+  consentCheckbox.addEventListener('change', () => {
+    consentConfirmBtn.disabled = !consentCheckbox.checked;
+  });
+
+  consentConfirmBtn.addEventListener('click', () => {
+    fadeOut(consentModal);
+    // Reset for next time
+    consentCheckbox.checked = false;
+    consentConfirmBtn.disabled = true;
+    // Proceed to the original function
+    showPriorityScreen(true); // Pass a flag to skip validation
+  }, { once: true }); // Use { once: true } to avoid multiple listeners
+}
+
+function showPriorityScreen(isValidated = false) {
+  if (!isValidated) {
+    const selectedClass = document.getElementById('classSelect').value;
+    const max = parseInt(document.getElementById('maxNumber').value);
+    if (!max || max < 1 || max > 25) {
+      showCustomAlert(`올바른 숫자를 입력해주세요.`);
+      return;
+    }
   }
   populatePriorityStudents();
   fadeOut(document.getElementById('inputScreen'));
